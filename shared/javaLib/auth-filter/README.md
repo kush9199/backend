@@ -159,3 +159,146 @@ shared:
   
 
 - **Why:** This fulfills the requirement that configuration remains completely local to the consuming app. When App A builds, it embeds these specific instructions into the shared library's logic for its own specific runtime context.
+
+# Spring Boot Testing — Specs (Default Config)
+
+## 1. Dependencies (Maven, already in `spring-boot-starter-test`)
+- JUnit 5 (Jupiter)
+- Mockito
+- AssertJ
+- Spring Test / Spring Boot Test
+- Hamcrest (optional)
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+```
+
+## 2. Test Categories & Annotations
+
+| Layer | Annotation | Loads |
+|---|---|---|
+| Unit (no Spring context) | none / `@ExtendWith(MockitoExtension.class)` | nothing — pure POJO test |
+| Full integration | `@SpringBootTest` | entire application context |
+| Web layer only | `@WebMvcTest(Controller.class)` | MVC infra + given controller |
+| JPA/repository layer | `@DataJpaTest` | JPA + embedded DB |
+| JSON serialization | `@JsonTest` | Jackson/Gson mappers |
+| Custom slice | `@SpringBootTest(webEnvironment = ...)` | configurable |
+
+## 3. Folder & Naming Convention
+```
+src/test/java/.../ClassNameTest.java      // unit test
+src/test/java/.../ClassNameIT.java        // integration test (Failsafe)
+```
+- Method names: `methodName_condition_expectedResult()`
+- One assertion concept per test (AssertJ `assertThat` preferred over JUnit asserts).
+
+## 4. Unit Test Template (Mockito)
+```java
+@ExtendWith(MockitoExtension.class)
+class OrderServiceTest {
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @InjectMocks
+    private OrderService orderService;
+
+    @Test
+    void getOrder_whenExists_returnsOrder() {
+        // Arrange
+        Order order = new Order(1L, "PENDING");
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
+
+        // Act
+        Order result = orderService.getOrder(1L);
+
+        // Assert
+        assertThat(result.getStatus()).isEqualTo("PENDING");
+        verify(orderRepository).findById(1L);
+    }
+}
+```
+
+## 5. Full Context Integration Test
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+class OrderControllerIT {
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    void createOrder_returns201() {
+        OrderRequest req = new OrderRequest("item1", 2);
+        ResponseEntity<OrderResponse> resp =
+            restTemplate.postForEntity("/orders", req, OrderResponse.class);
+
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    }
+}
+```
+
+## 6. Web Layer Slice Test
+```java
+@WebMvcTest(OrderController.class)
+class OrderControllerWebTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private OrderService orderService;
+
+    @Test
+    void getOrder_returnsJson() throws Exception {
+        when(orderService.getOrder(1L)).thenReturn(new Order(1L, "PENDING"));
+
+        mockMvc.perform(get("/orders/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+}
+```
+
+## 7. Repository Slice Test
+```java
+@DataJpaTest
+class OrderRepositoryTest {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Test
+    void save_and_findById_works() {
+        Order saved = orderRepository.save(new Order(null, "NEW"));
+        assertThat(orderRepository.findById(saved.getId())).isPresent();
+    }
+}
+```
+`@DataJpaTest` defaults to an in-memory embedded DB (H2) unless overridden, and each test runs in a rolled-back transaction.
+
+## 8. Default Test Configuration
+- Place overrides in `src/test/resources/application.yml` or `application-test.properties`.
+- Activate with `@ActiveProfiles("test")`.
+- `@SpringBootTest` auto-detects `@SpringBootApplication`/`@SpringBootConfiguration` class — no need to specify `classes=` unless multiple candidates exist.
+- Default test DB: H2 in-memory (if on classpath) for `@DataJpaTest`; falls back to configured DB otherwise.
+
+## 9. Common Test Utilities
+- `@MockBean` — replaces a bean in the Spring context with a Mockito mock.
+- `@TestConfiguration` — extra beans only for tests.
+- `@Sql` — run SQL scripts before/after a test method.
+- `TestEntityManager` — for JPA-slice tests needing persistence control.
+- `@DirtiesContext` — force context reload after a test (use sparingly, slow).
+
+## 10. Best Practices Checklist
+- [ ] Prefer unit tests (fast, no context) over `@SpringBootTest` where possible.
+- [ ] Keep integration tests few, focused on critical paths.
+- [ ] Use slice annotations (`@WebMvcTest`, `@DataJpaTest`) to limit context size.
+- [ ] Follow Arrange–Act–Assert structure.
+- [ ] Use AssertJ fluent assertions.
+- [ ] Avoid `Thread.sleep`; use `Awaitility` for async assertions if needed.
+- [ ] Run unit tests via `mvn test`, integration tests via `mvn verify` (Failsafe plugin, `*IT` suffix).
