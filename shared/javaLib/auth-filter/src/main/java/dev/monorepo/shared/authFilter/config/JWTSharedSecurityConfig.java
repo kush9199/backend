@@ -30,7 +30,7 @@ public class JWTSharedSecurityConfig {
     @Bean
     @ConditionalOnMissingBean(UserDetailsService.class)
     public UserDetailsService defaultUserDetailsService(JwtAuthFilterProperties props) {
-        // Option B: reflective fallback, driven by properties file
+
         if (props.getUserDetailsServiceClass() != null) {
             try {
                 var className = Class.forName(props.getUserDetailsServiceClass());

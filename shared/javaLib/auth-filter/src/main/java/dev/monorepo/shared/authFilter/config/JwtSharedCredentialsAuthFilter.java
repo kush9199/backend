@@ -53,6 +53,7 @@ public class JwtSharedCredentialsAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.clearContext();
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Invalid or Expired JWT Token: " + ex.getMessage());
+                return;
             }
         }
         filterChain.doFilter(request, response);
