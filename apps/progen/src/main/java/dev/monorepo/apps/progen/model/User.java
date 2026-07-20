@@ -1,5 +1,6 @@
 package dev.monorepo.apps.progen.model;
 
+import dev.monorepo.apps.progen.constant.ROLE;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,4 +18,5 @@ public class User {
     private String password;
     @Column(unique = true)
     private String email;
+    private ROLE role;
 }
