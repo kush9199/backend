@@ -1,0 +1,3 @@
+errors:
+  BROKEN_ENTRY:
+    message: "missing httpStatus and category"

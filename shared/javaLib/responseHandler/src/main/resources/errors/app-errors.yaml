@@ -1,0 +1,5 @@
+errors:
+  CUSTOM_APP_ERROR:
+    message: "app-specific validation failure"
+    httpStatus: 422
+    category: CLIENT_ERROR

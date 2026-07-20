@@ -1,0 +1,17 @@
+errors:
+  INTERNAL_ERROR:
+    message: "Something went wrong"
+    httpStatus: 500
+    category: SERVER_ERROR
+  VALIDATION_FAILED:
+    message: "Request validation failed"
+    httpStatus: 400
+    category: CLIENT_ERROR
+  INVALID_TOKEN:
+    message: "Authentication token is invalid or malformed"
+    httpStatus: 401
+    category: CLIENT_ERROR
+  TOKEN_EXPIRED:
+    message: "Authentication token has expired"
+    httpStatus: 401
+    category: CLIENT_ERROR

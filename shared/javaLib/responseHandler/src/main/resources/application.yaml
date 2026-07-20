@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: responseHandler
+
+server:
+  port: 6900
