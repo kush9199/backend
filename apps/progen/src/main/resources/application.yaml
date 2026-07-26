@@ -13,7 +13,7 @@ spring:
       hibernate:
         format_sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
 
 server:
   port: 3300
@@ -27,3 +27,5 @@ shared:
       - /api/v1/*
     user-details-service-class: dev.monorepo.apps.progen.service.UserAuthService
 
+  response-handler:
+    error-config-path: classpath:errors/app-errors.yaml

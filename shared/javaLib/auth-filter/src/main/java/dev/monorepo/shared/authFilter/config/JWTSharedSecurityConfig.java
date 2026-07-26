@@ -1,5 +1,7 @@
 package dev.monorepo.shared.authFilter.config;
 
+import dev.monorepo.shared.authFilter.service.JWTService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,6 +23,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableConfigurationProperties(JwtAuthFilterProperties.class)
 public class JWTSharedSecurityConfig {
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Bean
+    public JWTService jwtService(JwtAuthFilterProperties props) {
+        return new JWTService(props);
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public PasswordEncoder passwordEncoder() {
@@ -77,9 +87,10 @@ public class JWTSharedSecurityConfig {
                 auth.anyRequest().authenticated();
             }
         });
+
         http.authenticationManager(authenticationManager);
         http.addFilterBefore(
-                new JwtSharedCredentialsAuthFilter(props),
+                new JwtSharedCredentialsAuthFilter(props, userDetailsService),
                 UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

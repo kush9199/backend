@@ -7,8 +7,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -18,12 +20,14 @@ import java.util.ArrayList;
 
 @Component
 public class JwtSharedCredentialsAuthFilter extends OncePerRequestFilter {
-
+    private final UserDetailsService userDetailsService;
     private final JwtAuthFilterProperties props;
     public JwtSharedCredentialsAuthFilter(
-            JwtAuthFilterProperties props
-    ) {
+            JwtAuthFilterProperties props,
+            UserDetailsService userDetailsService
+    ){
         this.props = props;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -43,9 +47,11 @@ public class JwtSharedCredentialsAuthFilter extends OncePerRequestFilter {
                         .verifyWith(secretKey).build()
                         .parseSignedClaims(token).getPayload();
                 var username = claims.getSubject();
-                if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                var user = userDetailsService.loadUserByUsername(username);
+                System.out.println("test username: "+user.getUsername());
+                if (username.equals(user.getUsername()) && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(username, null, new ArrayList<>());
+                            new UsernamePasswordAuthenticationToken(username, null, user.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

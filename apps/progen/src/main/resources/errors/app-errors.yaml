@@ -1,0 +1,13 @@
+errors:
+  USER_ALREADY_EXISTS:
+    message: "If this email is registered, you will receive a confirmation link."
+    httpStatus: 202
+    category: CLIENT_ERROR
+  USER_NOT_FOUND:
+    message: "please signup"
+    httpStatus: 401
+    category: CLIENT_ERROR
+  INVALID_USER:
+    message: "not authenticated"
+    httpStatus: 401
+    category: CLIENT_ERROR
