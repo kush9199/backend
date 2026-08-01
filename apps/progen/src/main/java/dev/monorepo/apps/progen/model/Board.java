@@ -20,5 +20,4 @@ public class Board {
     private String name;
     private String background;
     private Instant createdAt;
-
 }

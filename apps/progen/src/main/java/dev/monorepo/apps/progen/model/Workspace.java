@@ -19,4 +19,8 @@ public class Workspace {
     private String name;
     @Getter @Setter
     private Instant createdAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    @Getter @Setter
+    private User owner;
 }

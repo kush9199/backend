@@ -21,6 +21,7 @@ public class JWTService {
     }
 
     private SecretKey getKey() {
+        System.out.println("key is :"+ props.getJwtSecretKey());
         return Keys.hmacShaKeyFor(props.getJwtSecretKey().getBytes(StandardCharsets.UTF_8));
     }
 

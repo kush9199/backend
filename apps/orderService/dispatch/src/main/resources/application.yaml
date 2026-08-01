@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: dispatch
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # if __TYPEId__ is not sent in the header
+      properties:
+        spring:
+          json:
+            value:
+              default:
+                type: dev.learn.kafka.orderservice.dispatch.message.OrderCreated

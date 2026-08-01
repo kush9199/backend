@@ -7,8 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -16,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 @Builder
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,18 +27,18 @@ public class User {
     private String email;
     @Enumerated(value = EnumType.STRING)
     private ROLE role;
-    @ManyToMany(cascade = CascadeType.ALL)
-    private Set<Workspace> workspaces = new HashSet<>();
+    private boolean isEnable;
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Workspace> workspaces = new ArrayList<>();
 
     public void addWorkspace(Workspace workspace) {
-        if(workspaces == null){
-            workspaces = new HashSet<>();
-        }
         this.workspaces.add(workspace);
+        workspace.setOwner(this);
     }
 
     public void removeWorkspace(Workspace workspace) {
         this.workspaces.remove(workspace);
+        workspace.setOwner(null);
     }
 
 }

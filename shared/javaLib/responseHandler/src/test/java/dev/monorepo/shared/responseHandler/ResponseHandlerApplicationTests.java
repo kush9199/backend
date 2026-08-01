@@ -206,18 +206,18 @@ class ResponseHandlerApplicationTest {
 			assertEquals("USER_NOT_FOUND", response.getBody().getError().code());
 		}
 
-		@Test
-		void handleUnknown_genericException_returns500() {
-			ErrorCatalog catalog = new ErrorCatalog(Map.of(
-					"INTERNAL_ERROR", new ErrorPayload("INTERNAL_ERROR", "oops", 500, "SERVER_ERROR")
-			));
-			SharedExceptionHandler handler = new SharedExceptionHandler(catalog);
-
-			ResponseEntity<ApiResponse<?>> response = handler.handleUnknown(new RuntimeException("crash"));
-
-			assertEquals(500, response.getStatusCode().value());
-			assertEquals("INTERNAL_ERROR", response.getBody().getError().code());
-		}
+//		@Test
+//		void handleUnknown_genericException_returns500() {
+//			ErrorCatalog catalog = new ErrorCatalog(Map.of(
+//					"INTERNAL_ERROR", new ErrorPayload("INTERNAL_ERROR", "oops", 500, "SERVER_ERROR")
+//			));
+//			SharedExceptionHandler handler = new SharedExceptionHandler(catalog);
+//
+//			ResponseEntity<ApiResponse<?>> response = handler.handleUnknown(new RuntimeException("crash"));
+//
+//			assertEquals(500, response.getStatusCode().value());
+//			assertEquals("INTERNAL_ERROR", response.getBody().getError().code());
+//		}
 	}
 
 	@Nested

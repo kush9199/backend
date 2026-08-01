@@ -8,8 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 @RequiredArgsConstructor
 public class SharedExceptionHandler {
     private final ErrorCatalog catalog;
@@ -22,11 +23,11 @@ public class SharedExceptionHandler {
                 .body(ApiResponse.error(payload));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<@NonNull ApiResponse<?>>  handleUnknown(Exception ex) {
-        var payload = catalog.resolve("INTERNAL_ERROR");
-        return ResponseEntity
-                .status(payload.httpStatus())
-                .body(ApiResponse.error(payload));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<@NonNull ApiResponse<?>>  handleUnknown(Exception ex) {
+//        var payload = catalog.resolve("INTERNAL_ERROR");
+//        return ResponseEntity
+//                .status(payload.httpStatus())
+//                .body(ApiResponse.error(payload));
+//    }
 }
